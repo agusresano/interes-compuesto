@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Interés Compuesto</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f9f7f3;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: normal;
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 2.5rem;
+    }
+    .intro {
+      background: #fff;
+      border-left: 3px solid #0F6E56;
+      border-radius: 0 8px 8px 0;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2.5rem;
+    }
+    .intro h2 {
+      font-size: 1.1rem;
+      font-weight: normal;
+      margin-bottom: 0.8rem;
+      color: #0F6E56;
+      letter-spacing: 0.3px;
+    }
+    .intro p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    .intro p:last-child { margin-bottom: 0; }
+    .variables {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+    }
+    .variables p {
+      margin-bottom: 0.4rem;
+    }
+    .var-label {
+      font-style: italic;
+      color: #0F6E56;
+    }
+    .simulator {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.75rem;
+      border: 1px solid #e8e4dc;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.1rem;
+    }
+    .slider-label {
+      font-size: 13px;
+      color: #888;
+      min-width: 150px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #0F6E56;
+    }
+    .slider-val {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 70px;
+      text-align: right;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1a1a1a;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 1.5rem 0;
+    }
+    .stat {
+      background: #f9f7f3;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 5px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-val {
+      font-size: 1.3rem;
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1a1a1a;
+    }
+    .stat-val.green { color: #0F6E56; }
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .leg-box { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+    .annotation {
+      font-size: 12px;
+      color: #999;
+      margin-top: 0.75rem;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Interés compuesto</h1>
+    <p class="subtitle">Un simulador para entender cómo crece tu dinero</p>
+
+    <div class="intro">
+      <h2>¿Qué es el interés compuesto?</h2>
+      <p>Imaginate que plantás un árbol. El primer año crece un poco. Pero ese crecimiento también crece al año siguiente, y el siguiente, y así. Con el dinero pasa lo mismo.</p>
+      <p>Cuando invertís, tu dinero genera ganancias. Y esas ganancias, a su vez, también generan ganancias. Con el tiempo, el dinero empieza a crecer solo, cada vez más rápido.</p>
+      <div class="variables">
+        <p><span class="var-label">Ahorro mensual</span> — cuánto ponés cada mes. Más aportás, más grande es la base que crece.</p>
+        <p><span class="var-label">Rentabilidad anual</span> — qué tan rápido crece tu dinero. Depende de dónde invertís.</p>
+        <p><span class="var-label">Años invertiendo</span> — el tiempo es la variable más poderosa. Cuanto antes empezás, más tiempo tiene el dinero para multiplicarse.</p>
+        <p style="margin-top:1rem;">La barra verde es lo que tu dinero generó solo. La barra azul es lo que pusiste vos. El objetivo es que la verde supere a la azul — y con paciencia, siempre lo hace.</p>
+      </div>
+    </div>
+
+    <div class="simulator">
+      <div class="slider-row">
+        <span class="slider-label">Ahorro mensual</span>
+        <input type="range" min="10" max="200" value="30" step="5" id="aporte">
+        <span class="slider-val" id="aporte-out">$30/mes</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">Rentabilidad anual</span>
+        <input type="range" min="1" max="12" value="7" step="0.5" id="rate">
+        <span class="slider-val" id="rate-out">7%</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">Años invertiendo</span>
+        <input type="range" min="1" max="50" value="20" step="1" id="years">
+        <span class="slider-val" id="years-out">20 años</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-label">Lo que pusiste vos</div>
+          <div class="stat-val" id="aportado">$7.200</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Lo que generó solo</div>
+          <div class="stat-val green" id="ganado">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total final</div>
+          <div class="stat-val" id="total">—</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><span class="leg-box" style="background:#0F6E56"></span>Lo que generó solo (intereses)</span>
+        <span><span class="leg-box" style="background:#B5D4F4"></span>Lo que pusiste vos</span>
+      </div>
+
+      <div style="position: relative; width: 100%; height: 280px;">
+        <canvas id="chart" role="img" aria-label="Gráfico de barras apiladas de crecimiento por interés compuesto">Gráfico de crecimiento por interés compuesto.</canvas>
+      </div>
+
+      <p class="annotation" id="nota">En <span id="mitad-anos">10</span> años ya habrás ganado más en intereses que en dinero propio.</p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script>
+    const fmt = n => n >= 1000 ? '$' + (n/1000).toFixed(1).replace('.',',') + 'K' : '$' + Math.round(n);
+
+    function calcSeries(aporte, rate, years) {
+      const r = rate / 100 / 12;
+      const labels = [], aportados = [], intereses = [];
+      for (let y = 1; y <= years; y++) {
+        const n = y * 12;
+        const total = aporte * ((Math.pow(1+r,n)-1)/r) * (1+r);
+        const aport = aporte * n;
+        labels.push("Año " + y);
+        aportados.push(Math.round(aport));
+        intereses.push(Math.round(total - aport));
+      }
+      return { labels, aportados, intereses };
+    }
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: [], datasets: [
+        { label: 'Lo que pusiste vos', data: [], backgroundColor: '#B5D4F4', stack: 's' },
+        { label: 'Intereses generados', data: [], backgroundColor: '#0F6E56', stack: 's' }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: ctx => ' ' + fmt(ctx.raw) }
+        }},
+        scales: {
+          x: { stacked: true, ticks: { autoSkip: true, maxTicksLimit: 10, font: { size: 11 }, color: '#aaa' }, grid: { display: false } },
+          y: { stacked: true, ticks: { callback: v => fmt(v), font: { size: 11 }, color: '#aaa' }, grid: { color: 'rgba(0,0,0,0.06)' } }
+        }
+      }
+    });
+
+    function update() {
+      const aporte = +document.getElementById('aporte').value;
+      const rate = +document.getElementById('rate').value;
+      const years = +document.getElementById('years').value;
+
+      document.getElementById('aporte-out').textContent = '$' + aporte + '/mes';
+      document.getElementById('rate-out').textContent = rate.toFixed(1).replace('.',',') + '%';
+      document.getElementById('years-out').textContent = years + ' años';
+
+      const { labels, aportados, intereses } = calcSeries(aporte, rate, years);
+      const totalAport = aportados[years-1];
+      const totalInt = intereses[years-1];
+      const totalFin = totalAport + totalInt;
+
+      document.getElementById('aportado').textContent = fmt(totalAport);
+      document.getElementById('ganado').textContent = fmt(totalInt);
+      document.getElementById('total').textContent = fmt(totalFin);
+
+      let mitad = years;
+      for (let i = 0; i < years; i++) {
+        if (intereses[i] >= aportados[i]) { mitad = i + 1; break; }
+      }
+      document.getElementById('mitad-anos').textContent = mitad;
+
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = aportados;
+      chart.data.datasets[1].data = intereses;
+      chart.update('none');
+    }
+
+    ['aporte','rate','years'].forEach(id => document.getElementById(id).addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>
